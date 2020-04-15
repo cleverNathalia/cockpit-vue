@@ -133,8 +133,6 @@
                                               label="*HostClass"
                                             ></v-select>
 
-                                            
-
 
                                             <v-text-field
                                               v-model="editedItem.BladeIndex"
@@ -159,16 +157,26 @@
                                               label="Slot"
                                               type="text"
                                             ></v-text-field>
+
+                                            <v-row>
+                                              <v-col><h3>Interface</h3></v-col>
+                                              <v-col><v-btn @click="addInterface">Add</v-btn></v-col>
+                                            </v-row>
+
+                                            <interface
+                                              v-for="interface in editedItem.interfaces"
+                                              :interface="interface"
+                                            ></interface>
                                           </v-form>
                                         </v-col>
                                         <!-- <v-col cols="12" sm="6" md="4">
-                                          
+
                                         </v-col>
                                         <v-col cols="12" sm="6" md="4">
-                                          
+
                                         </v-col>
                                         <v-col cols="12" sm="6" md="4">
-                                          
+
                                         </v-col> -->
                                       </v-row>
                                     </v-container>
@@ -251,6 +259,44 @@
     <script src="../base1/vuex.min.js"></script>
 
     <script>
+      Vue.component('interface', {
+        props: ['interface'],
+        template: `
+        <v-row
+          dense
+        >
+          <v-col>
+            <v-text-field
+              v-model="interface.ip"
+              label="IP"
+              dense
+            />
+          </v-col>
+          <v-col>
+            <v-text-field
+              v-model="interface.mac"
+              label="MAC"
+              dense
+            />
+          </v-col>
+          <v-col>
+            <v-text-field
+              v-model="interface.name"
+              label="Name"
+              dense
+            />
+          </v-col>
+          <v-col>
+            <v-text-field
+              v-model="interface.network"
+              label="Network"
+              dense
+            />
+          </v-col>
+        </v-row>
+        `
+      })
+
       new Vue({
         el: "#app",
         data() {
@@ -364,6 +410,7 @@
               FlippedFabric: "false",
               ProductName: "",
               Slot: "",
+              interfaces: [{ip: null, mac: null, name: null, network: null}]
             },
 
             defaultItem: {
@@ -420,6 +467,9 @@
         },
 
         methods: {
+          addInterface() {
+            this.editedItem.interfaces.push({ip: null, mac: null, name: null, network: null})
+          },
           // async initialize() {
           //   let self = this;
 
