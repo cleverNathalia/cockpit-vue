@@ -85,7 +85,11 @@
                                 hide-details
                               ></v-text-field>
                               <v-spacer></v-spacer>
+<<<<<<< HEAD
                               <v-dialog v-model="dialog" max-width="800px">
+=======
+                              <v-dialog v-model="dialog" max-width="600px">
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
                                 <template v-slot:activator="{ on }">
                                   <!-- NEW SERVER -->
                                   <v-btn
@@ -108,7 +112,7 @@
                                   <v-card-text>
                                     <v-container>
                                       <v-row>
-                                        <v-col cols="12" sm="12" md="12">
+                                        <v-col cols="12">
                                           <v-form ref="form" lazy-validation>
                                             <v-text-field
                                               v-model="editedItem.HostName"
@@ -133,6 +137,7 @@
                                               label="*HostClass"
                                             ></v-select>
 
+<<<<<<< HEAD
                                             <!-- <v-card>
                                               <v-card-title>
                                                 Interfaces
@@ -165,6 +170,8 @@
                                             :interfaces="editedItem.interfaces"
                                             @remove="removeInterface(index)"
                                           ></interface>
+=======
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
 
                                             <v-text-field
                                               v-model="editedItem.BladeIndex"
@@ -189,17 +196,20 @@
                                               label="Slot"
                                               type="text"
                                             ></v-text-field>
+
+                                            <v-row>
+                                              <v-col><h3>Interface</h3></v-col>
+                                              <v-col><v-btn @click="addInterface">Add</v-btn></v-col>
+                                            </v-row>
+
+                                            <interface
+                                              v-for="(interface, index) in editedItem.interfaces"
+                                              :interface="interface"
+                                              :interfaces="editedItem.interfaces"
+                                              @remove="removeInterface(index)"
+                                            ></interface>
                                           </v-form>
                                         </v-col>
-                                        <!-- <v-col cols="12" sm="6" md="4">
-                                          
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                          
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                          
-                                        </v-col> -->
                                       </v-row>
                                     </v-container>
                                   </v-card-text>
@@ -255,9 +265,9 @@
                             >
                           </template>
                         </v-data-table>
-                        <v-btn color="primary" dark class="mt-4 mb-2"
-                          >Write State</v-btn
-                        >
+                        <v-btn color="primary" dark class="mt-4 mb-2">
+                          Write State
+                        </v-btn>
                       </v-card>
                     </v-tab-item>
                   </v-tabs-items>
@@ -274,7 +284,11 @@
     <script src="../base1/vuex.min.js"></script>
 
     <script>
+<<<<<<< HEAD
       Vue.component("interface", {
+=======
+      Vue.component('interface', {
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
         props: ['interface', 'interfaces'],
         computed: {
           networkItems() {
@@ -288,12 +302,17 @@
         },
         template: `
         <v-row
+<<<<<<< HEAD
           
+=======
+          dense
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
         >
           <v-col>
             <v-text-field
               v-model="interface.ip"
               label="IP"
+<<<<<<< HEAD
               
               required
             />
@@ -304,18 +323,33 @@
               label="MAC"
               
               required
+=======
+              dense
+            />
+          </v-col>
+          <v-col>
+            <v-text-field
+              v-model="interface.mac"
+              label="MAC"
+              dense
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
             />
           </v-col>
           <v-col>
             <v-text-field
               v-model="interface.name"
               label="Name"
+<<<<<<< HEAD
               
               required
+=======
+              dense
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
             />
           </v-col>
           <v-col>
             <v-select
+<<<<<<< HEAD
               v-model="interface.network"
               :items="networkItems"
               label="Network"
@@ -333,6 +367,24 @@
         </v-row>
         `,
       });
+=======
+              :items="networkItems"
+              v-model="interface.network"
+              label="Network"
+              dense
+            />
+          </v-col>
+          <v-col cols="1">
+            <v-btn icon>
+              <v-icon @click="$emit('remove')">
+                fas fa-trash
+              </v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+        `
+      })
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
 
       new Vue({
         el: "#app",
@@ -348,19 +400,6 @@
             headers_tab: ["Configured", "Unconfigured"],
 
             dialog: false,
-            //   headers_servers: [
-            //     {
-            //       text: "Dessert (100g serving)",
-            //       align: "start",
-            //       sortable: true,
-            //       value: "name",
-            //     },
-            //     { text: "Calories", value: "calories" },
-            //     { text: "Fat (g)", value: "fat" },
-            //     { text: "Carbs (g)", value: "carbs" },
-            //     { text: "Protein (g)", value: "protein" },
-            //     { text: "Actions", value: "actions", sortable: false },
-            //   ],
             headers_servers: [
               {
                 text: "HostName",
@@ -520,9 +559,13 @@
 
         methods: {
           addInterface() {
+<<<<<<< HEAD
       
             this.editedItem.interfaces.push({ip: null, mac: null, name: null, network: null});
      
+=======
+            this.editedItem.interfaces.push({ip: null, mac: null, name: null, network: null})
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
           },
           removeInterface(index) {
             this.editedItem.interfaces.splice(index, 1)
@@ -548,17 +591,30 @@
                 BladeIndex: null,
                 FlippedFabric: false,
                 HostClass: 1,
+<<<<<<< HEAD
                 Hostname: "nameHere",
                 Interface: [
                   {
                     IP: ["565.5656.56.56"],
                     MAC: "56566565656",
+=======
+                Hostname: "brood",
+                Interface: [
+                  {
+                    IP: ["123.23.23.23"],
+                    MAC: "55:999:90:0",
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
                     Name: "eth0",
                     Network: "internal",
                   },
                   {
+<<<<<<< HEAD
                     IP: ["121f.4545f.44554"],
                     MAC: "565:5656:56",
+=======
+                    IP: ["124.30.252.63"],
+                    MAC: "78:90:77:4f",
+>>>>>>> 82da7400ea876d46f0cb4d881b81dc6d2cbcc4f5
                     Name: "eth1",
                     Network: "external",
                   },
