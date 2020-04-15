@@ -85,7 +85,7 @@
                                 hide-details
                               ></v-text-field>
                               <v-spacer></v-spacer>
-                              <v-dialog v-model="dialog" max-width="500px">
+                              <v-dialog v-model="dialog" max-width="600px">
                                 <template v-slot:activator="{ on }">
                                   <!-- NEW SERVER -->
                                   <v-btn
@@ -108,7 +108,7 @@
                                   <v-card-text>
                                     <v-container>
                                       <v-row>
-                                        <v-col cols="12" sm="12" md="12">
+                                        <v-col cols="12">
                                           <v-form ref="form" lazy-validation>
                                             <v-text-field
                                               v-model="editedItem.HostName"
@@ -166,19 +166,11 @@
                                             <interface
                                               v-for="(interface, index) in editedItem.interfaces"
                                               :interface="interface"
+                                              :interfaces="editedItem.interfaces"
                                               @remove="removeInterface(index)"
                                             ></interface>
                                           </v-form>
                                         </v-col>
-                                        <!-- <v-col cols="12" sm="6" md="4">
-
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-
-                                        </v-col> -->
                                       </v-row>
                                     </v-container>
                                   </v-card-text>
@@ -241,9 +233,9 @@
                             >
                           </template>
                         </v-data-table>
-                        <v-btn color="primary" dark class="mt-4 mb-2"
-                          >Write State</v-btn
-                        >
+                        <v-btn color="primary" dark class="mt-4 mb-2">
+                          Write State
+                        </v-btn>
                       </v-card>
                     </v-tab-item>
                   </v-tabs-items>
@@ -261,7 +253,18 @@
 
     <script>
       Vue.component('interface', {
-        props: ['interface'],
+        props: ['interface', 'interfaces'],
+        computed: {
+          networkItems() {
+            const networks = this.interfaces.map(_interface => _interface.network)
+            const networkOptions = [
+              'Capture',
+              ...(networks.filter(value => value==='Internal').length < 1 || this.interface.network === 'Internal' ? ['Internal'] : []),
+              ...(networks.filter(value => value==='External').length < 1 || this.interface.network === 'External' ? ['External'] : [])
+            ]
+            return networkOptions
+          }
+        },
         template: `
         <v-row
           dense
@@ -288,7 +291,8 @@
             />
           </v-col>
           <v-col>
-            <v-text-field
+            <v-select
+              :items="networkItems"
               v-model="interface.network"
               label="Network"
               dense
@@ -320,19 +324,6 @@
             headers_tab: ["Configured", "Unconfigured"],
 
             dialog: false,
-            //   headers_servers: [
-            //     {
-            //       text: "Dessert (100g serving)",
-            //       align: "start",
-            //       sortable: true,
-            //       value: "name",
-            //     },
-            //     { text: "Calories", value: "calories" },
-            //     { text: "Fat (g)", value: "fat" },
-            //     { text: "Carbs (g)", value: "carbs" },
-            //     { text: "Protein (g)", value: "protein" },
-            //     { text: "Actions", value: "actions", sortable: false },
-            //   ],
             headers_servers: [
               {
                 text: "HostName",
