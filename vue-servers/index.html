@@ -257,12 +257,11 @@
         computed: {
           networkItems() {
             const networks = this.interfaces.map(_interface => _interface.network)
-            const networkOptions = [
+            return [
               'Capture',
               ...(networks.filter(value => value==='Internal').length < 1 || this.interface.network === 'Internal' ? ['Internal'] : []),
               ...(networks.filter(value => value==='External').length < 1 || this.interface.network === 'External' ? ['External'] : [])
             ]
-            return networkOptions
           }
         },
         template: `
