@@ -85,7 +85,7 @@
                                 hide-details
                               ></v-text-field>
                               <v-spacer></v-spacer>
-                              <v-dialog v-model="dialog" max-width="500px">
+                              <v-dialog v-model="dialog" max-width="800px">
                                 <template v-slot:activator="{ on }">
                                   <!-- NEW SERVER -->
                                   <v-btn
@@ -133,8 +133,38 @@
                                               label="*HostClass"
                                             ></v-select>
 
-                                            
+                                            <!-- <v-card>
+                                              <v-card-title>
+                                                Interfaces
+                                              </v-card-title>
+                                              <v-data-table
+                                               
+                                                :headers="interface_headers"
+                                                :items="editedItem.Interface"
+                                              ></v-data-table>
+                                            </v-card> -->
 
+                                            <v-row>
+                                              <v-col cols="12">
+                                                <h3>
+                                                  Interfaces
+                                                  <v-icon
+                                                    small
+                                                    class="ml-2 pa-2"
+                                                    @click="addInterface"
+                                                  >
+                                                    fas fa-plus
+                                                  </v-icon>
+                                                </h3>
+                                              </v-col>
+                                            </v-row>
+
+                                            <interface
+                                            v-for="(interface, index) in editedItem.interfaces"
+                                            :interface="interface"
+                                            :interfaces="editedItem.interfaces"
+                                            @remove="removeInterface(index)"
+                                          ></interface>
 
                                             <v-text-field
                                               v-model="editedItem.BladeIndex"
@@ -193,30 +223,23 @@
                               </v-dialog>
                             </v-toolbar>
                           </template>
+
                           <template v-slot:expanded-item="{ headers, item }">
                             <td :colspan="headers_servers.length" class="pa-6">
                               <v-card>
                                 <v-card-title>
                                   Interfaces
-                                  <v-spacer></v-spacer>
-                                  <v-text-field
-                                    v-model="searchInterface"
-                                    append-icon="mdi-magnify"
-                                    label="Search"
-                                    single-line
-                                    hide-details
-                                  ></v-text-field>
                                 </v-card-title>
                                 <v-data-table
                                   :headers="interface_headers"
                                   :items="item.Interface"
-                                  :search="searchInterface"
-                                  :items-per-page="5"
+                                  hide-default-footer
                                 >
                                 </v-data-table>
                               </v-card>
                             </td>
                           </template>
+
                           <!-- EDIT / DELETE BUTTONS IN TABLE -->
                           <template v-slot:item.actions="{ item }">
                             <v-icon small class="mr-2" @click="editItem(item)">
@@ -251,12 +274,71 @@
     <script src="../base1/vuex.min.js"></script>
 
     <script>
+      Vue.component("interface", {
+        props: ['interface', 'interfaces'],
+        computed: {
+          networkItems() {
+            const networks = this.interfaces.map(_interface => _interface.network)
+            return [
+              'Capture',
+              ...(networks.filter(value => value==='Internal').length < 1 || this.interface.network === 'Internal' ? ['Internal'] : []),
+              ...(networks.filter(value => value==='External').length < 1 || this.interface.network === 'External' ? ['External'] : [])
+            ]
+          }
+        },
+        template: `
+        <v-row
+          
+        >
+          <v-col>
+            <v-text-field
+              v-model="interface.ip"
+              label="IP"
+              
+              required
+            />
+            </v-col>
+            <v-col>
+            <v-text-field
+              v-model="interface.mac"
+              label="MAC"
+              
+              required
+            />
+          </v-col>
+          <v-col>
+            <v-text-field
+              v-model="interface.name"
+              label="Name"
+              
+              required
+            />
+          </v-col>
+          <v-col>
+            <v-select
+              v-model="interface.network"
+              :items="networkItems"
+              label="Network"
+              
+              required
+              />
+          
+            
+          </v-col>
+          <v-col >
+            <v-icon class="ml-2 mt-4" small  @click="$emit('remove')">
+                fas fa-trash
+              </v-icon>
+          </v-col>
+        </v-row>
+        `,
+      });
+
       new Vue({
         el: "#app",
         data() {
           return {
             selected: [],
-            searchInterface: "",
             search: "",
             expanded: [],
             info: null,
@@ -350,6 +432,20 @@
                 value: true,
               },
             ],
+            interface_network: [
+              {
+                text: "Internal",
+                value: "internal",
+              },
+              {
+                text: "Capture",
+                value: "capture",
+              },
+              {
+                text: "External",
+                value: "external",
+              },
+            ],
             stringRules: [
               (v) => !!v || "This field is required",
               (v) => v.length <= 30 || "Name must be less than 30 characters",
@@ -360,10 +456,12 @@
               HostName: "",
               SerialNumber: "",
               HostClass: 0,
+              Interfaces: [],
               BladeIndex: null,
               FlippedFabric: "false",
               ProductName: "",
               Slot: "",
+              interfaces: [{ip: null, mac: null, name: null, network: null}]
             },
 
             defaultItem: {
@@ -374,16 +472,17 @@
               FlippedFabric: "false",
               ProductName: "",
               Slot: "",
+              interfaces: [{ip: null, mac: null, name: null, network: null}]
             },
 
             exampleArr: [],
 
             servers_data: [],
-            interfaces_data: [],
           };
         },
         computed: {
           formTitle() {
+            this.interfaces;
             return this.editedIndex === -1 ? "New Server" : "Edit Server";
           },
           // unconfigured_servers: function () {
@@ -420,6 +519,14 @@
         },
 
         methods: {
+          addInterface() {
+      
+            this.editedItem.interfaces.push({ip: null, mac: null, name: null, network: null});
+     
+          },
+          removeInterface(index) {
+            this.editedItem.interfaces.splice(index, 1)
+          },
           // async initialize() {
           //   let self = this;
 
@@ -441,17 +548,17 @@
                 BladeIndex: null,
                 FlippedFabric: false,
                 HostClass: 1,
-                Hostname: "dip-sm",
+                Hostname: "nameHere",
                 Interface: [
                   {
-                    IP: ["10.41.0.1/16"],
-                    MAC: "54:9f:35:15:46:82",
+                    IP: ["565.5656.56.56"],
+                    MAC: "56566565656",
                     Name: "eth0",
                     Network: "internal",
                   },
                   {
-                    IP: ["172.16.41.30/16"],
-                    MAC: "54:9f:35:15:46:84",
+                    IP: ["121f.4545f.44554"],
+                    MAC: "565:5656:56",
                     Name: "eth1",
                     Network: "external",
                   },
@@ -459,7 +566,7 @@
                 ProductName: "",
                 SerialNumber: "",
                 Slot: "",
-              }
+              },
             ];
 
             console.log(dataJson);
@@ -530,14 +637,13 @@
 
           save() {
             if (this.editedIndex > -1) {
-              if(this.$refs.form.validate()){
+              if (this.$refs.form.validate()) {
                 Object.assign(
-                this.servers_data[this.editedIndex],
-                this.editedItem
-              );
-              this.close();
+                  this.servers_data[this.editedIndex],
+                  this.editedItem
+                );
+                this.close();
               }
-
             } else {
               if (this.$refs.form.validate()) {
                 this.servers_data.push(this.editedItem);
