@@ -164,8 +164,9 @@
                                             </v-row>
 
                                             <interface
-                                              v-for="interface in editedItem.interfaces"
+                                              v-for="(interface, index) in editedItem.interfaces"
                                               :interface="interface"
+                                              @remove="removeInterface(index)"
                                             ></interface>
                                           </v-form>
                                         </v-col>
@@ -292,6 +293,13 @@
               label="Network"
               dense
             />
+          </v-col>
+          <v-col cols="1">
+            <v-btn icon>
+              <v-icon @click="$emit('remove')">
+                fas fa-trash
+              </v-icon>
+            </v-btn>
           </v-col>
         </v-row>
         `
@@ -469,6 +477,9 @@
         methods: {
           addInterface() {
             this.editedItem.interfaces.push({ip: null, mac: null, name: null, network: null})
+          },
+          removeInterface(index) {
+            this.editedItem.interfaces.splice(index, 1)
           },
           // async initialize() {
           //   let self = this;
