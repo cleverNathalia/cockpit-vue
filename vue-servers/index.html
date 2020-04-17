@@ -232,16 +232,26 @@
           const networks = this.interfaces.map(
             (_interface) => _interface.Network
           );
+          console.log(networks);
           return [
-            "Capture",
-            ...(networks.filter((value) => value === "Internal").length < 1 ||
-              this.interface.Network === "Internal"
-              ? ["Internal"]
-              : []),
-            ...(networks.filter((value) => value === "External").length < 1 ||
-              this.interface.Network === "External"
-              ? ["External"]
-              : []),
+            {
+              text: "Capture",
+              value: "capture"
+            },
+            {
+              text: "Internal",
+              value: networks.filter((value) => value === "internal").length < 1 ||
+                this.interface.Network === "internal"
+                ? "internal"
+                : "",
+            },
+            {
+              text: "External",
+              value: networks.filter((value) => value === "external").length < 1 ||
+                this.interface.Network === "external"
+                ? "external"
+                : "",
+            }
           ];
         },
       },
@@ -412,7 +422,7 @@
             FlippedFabric: "false",
             ProductName: "",
             Slot: "",
-            Interface: [{ IP: null, MAC: null, Name: null, Netwrok: null }],
+            Interface: [{ IP: null, MAC: null, Name: null, Network: null }],
           },
 
           defaultItem: {
@@ -511,7 +521,7 @@
 
         initialize() {
           let dataJson = [
-            {
+          {
               BladeIndex: null,
               FlippedFabric: false,
               HostClass: 1,
@@ -584,6 +594,7 @@
         editItem(item) {
           this.editedIndex = this.servers_data.indexOf(item);
           this.editedItem = Object.assign({}, item);
+          console.log(this.editedItem);
           this.dialog = true;
         },
 
