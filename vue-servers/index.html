@@ -77,7 +77,7 @@
                               hide-details></v-text-field>
                             <v-spacer></v-spacer>
 
-                            <v-dialog v-model="dialog" max-width="1000px">
+                            <v-dialog persistent v-model="dialog" max-width="1000px">
                               <template v-slot:activator="{ on }">
                                 <!-- NEW SERVER -->
                                 <v-btn color="primary" dark class="mb-2" v-on="on">New Server</v-btn>
@@ -113,6 +113,9 @@
                                                   fas fa-plus
                                                 </v-icon>
                                               </h3>
+                                              <v-alert v-model="error_interface" dense outlined type="error">
+                                                {{ errorMessageInterface }}
+                                              </v-alert>
                                             </v-col>
                                           </v-row>
                                           <interface v-for="(interface, index) in editedItem.Interface"
@@ -149,7 +152,7 @@
                             </v-dialog>
 
                             <!-- DIALOG - DELETE CHECK -->
-                            <v-dialog v-model="dialogDelete" max-width="500">
+                            <v-dialog persistent v-model="dialogDelete" max-width="500">
                               <v-card>
                                 <v-card-title class="headline text-center">
                                   <span>
@@ -227,31 +230,33 @@
     // INTERFACE COMPONENT - POPUP
     Vue.component("interface", {
       props: ["interface", "interfaces"],
+      data(){
+        return{
+          // The standard (IEEE 802) format for printing MAC-48 addresses in human-friendly form is six groups of two hexadecimal digits, separated by hyphens - or colons :.
+          macRules: [
+            (v) => /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(v) || "This does not adhere to MAC address syntax."
+          ],
+          ipRules:[
+            (v) => /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test(v) || "This does not adhere to IP address syntax."
+          ],
+        }
+      },
       computed: {
         networkItems() {
           const networks = this.interfaces.map(
             (_interface) => _interface.Network
           );
-          console.log(networks);
           return [
             {
-              text: "Capture",
+              text: "Capture", 
               value: "capture"
             },
-            {
-              text: "Internal",
-              value: networks.filter((value) => value === "internal").length < 1 ||
-                this.interface.Network === "internal"
-                ? "internal"
-                : "",
-            },
-            {
-              text: "External",
-              value: networks.filter((value) => value === "external").length < 1 ||
-                this.interface.Network === "external"
-                ? "external"
-                : "",
-            }
+            ...(networks.filter((value) => value === "internal").length < 1 ||
+              this.interface.Network === "internal" ?
+              [{ text: "Internal", value: "internal" }] : []),
+            ...(networks.filter((value) => value === "external").length < 1 ||
+              this.interface.Network === "external" ?
+              [{ text: "External", value: "external" }] : []),
           ];
         },
       },
@@ -264,6 +269,7 @@
             <v-text-field
               v-model="interface.IP"
               label="IP"
+              :rules="ipRules"
             />
             </v-col>
 
@@ -271,6 +277,7 @@
             <v-text-field
               v-model="interface.MAC"
               label="MAC"
+              :rules="macRules"
             />
           </v-col>
 
@@ -322,6 +329,9 @@
           dialog: false,
           dialogDelete: false,
           itemToDelete: "",
+
+          error_interface: false,
+          errorMessageInterface: "",
 
           headers_servers: [
             {
@@ -410,7 +420,7 @@
           ],
           stringRules: [
             (v) => !!v || "This field is required",
-            (v) => v.length <= 30 || "Name must be less than 30 characters",
+            (v) => v == 30 || "Name must be less than 30 characters",
           ],
           editedIndex: -1,
 
@@ -471,34 +481,27 @@
             this.editedItem = Object.assign({}, this.defaultItem);
             this.editedIndex = -1;
           }
-          val || close();
+          val || this.close();
         },
         dialogDelete(val) {
-          val || close();
+          val || this.close();
         },
         selected: function () {
-          if (this.selected.length != 0) {
-            this.disabledSubmitConfig = false;
-          } else {
-            this.disabledSubmitConfig = true;
-          }
-        }
+          this.disabledSubmitConfig = this.selected.length == 0;
+        },            
+     
       },
       created() {
         this.initialize();
       },
 
-      mounted() {
-        // this.initialize();
-      },
-
       methods: {
         addInterface() {
           this.editedItem.Interface.push({
-            ip: null,
-            mac: null,
-            name: null,
-            network: null,
+            IP: null,
+            MAC: null,
+            Name: null,
+            Network: null,
           });
         },
         removeInterface(index) {
@@ -521,11 +524,11 @@
 
         initialize() {
           let dataJson = [
-          {
+            {
               BladeIndex: null,
               FlippedFabric: false,
               HostClass: 1,
-              Hostname: "nameHere",
+              Hostname: "Server1",
               Interface: [
                 {
                   IP: ["565.5656.56.56"],
@@ -536,6 +539,86 @@
                 {
                   IP: ["121f.4545f.44554"],
                   MAC: "565:5656:56",
+                  Name: "eth1",
+                  Network: "external",
+                },
+              ],
+              ProductName: "tendi300",
+              SerialNumber: "23457764",
+              Slot: "22",
+            },
+            {
+              BladeIndex: null,
+              FlippedFabric: false,
+              HostClass: 1,
+              Hostname: "Server_2",
+              Interface: [
+                {
+                  IP: ["172.23.25.11"],
+                  MAC: "35:78:95:40",
+                  Name: "eth0",
+                  Network: "internal",
+                },
+              ],
+              ProductName: "clash49",
+              SerialNumber: "98765434",
+              Slot: "23",
+            },
+            {
+              BladeIndex: null,
+              FlippedFabric: false,
+              HostClass: 1,
+              Hostname: "Sever3",
+              Interface: [
+                {
+                  IP: ["777.25.14.95"],
+                  MAC: "26:55:14:11",
+                  Name: "eth0",
+                  Network: "internal",
+                },
+              ],
+              ProductName: "r2d2",
+              SerialNumber: "4524321",
+              Slot: "27",
+            },
+            {
+              BladeIndex: null,
+              FlippedFabric: false,
+              HostClass: 1,
+              Hostname: "server400",
+              Interface: [
+                {
+                  IP: ["144.25.16.98"],
+                  MAC: "99:3f:55:6g",
+                  Name: "eth0",
+                  Network: "internal",
+                },
+                {
+                  IP: ["121f.4545f.44554"],
+                  MAC: "33:45:f5:67",
+                  Name: "eth1",
+                  Network: "external",
+                },
+              ],
+              ProductName: "",
+              SerialNumber: "",
+              Slot: "",
+            },
+            {
+              BladeIndex: null,
+              FlippedFabric: false,
+              HostClass: 1,
+              Hostname: "serv005",
+              Interface: [
+                {
+                  IP: ["44.25.66.78"],
+                  MAC: "20:56:14:88",
+                  Name: "eth0",
+                  Network: "internal",
+                },
+                {
+                  IP: ["121f.4545f.44554"],
+                  MAC: "55:63:25:12",
                   Name: "eth1",
                   Network: "external",
                 },
@@ -588,13 +671,13 @@
           }
 
           this.server_count = this.servers_data.length;
-
         },
 
         editItem(item) {
           this.editedIndex = this.servers_data.indexOf(item);
           this.editedItem = Object.assign({}, item);
-          console.log(this.editedItem);
+
+          // console.log(this.editedItem);
           this.dialog = true;
         },
 
@@ -613,32 +696,46 @@
         },
 
         close() {
-          this.dialog = false;
-          setTimeout(() => {
+            this.dialog = false;
             this.editedItem = Object.assign({}, this.defaultItem);
             this.editedIndex = -1;
-          }, 300);
         },
 
         save() {
           if (this.editedIndex > -1) {
-            if (this.$refs.form.validate()) {
+            if (this.$refs.form.validate() && !this.editedItem.Interface.filter((value) => value.Network === "internal").length < 1) {
               Object.assign(
                 this.servers_data[this.editedIndex],
                 this.editedItem
               );
               this.close();
+            }else if(this.editedItem.Interface.filter((value) => value.Network === "internal").length < 1){
+              this.error_interface = true;
+              this.errorMessageInterface = "Required. An internal interface must be defined."
+            }else{
+              this.error_interface = false;
+              this.errorMessageInterface = ""
             }
           } else {
-            if (this.$refs.form.validate()) {
+            if (this.$refs.form.validate() && !this.editedItem.Interface.filter((value) => value.Network === "internal").length < 1) {
               this.servers_data.push(this.editedItem);
               this.close();
+            }else if(this.editedItem.Interface.filter((value) => value.Network === "internal").length < 1){
+              this.error_interface = true;
+              this.errorMessageInterface = "Required. An internal interface must be defined."
+            }else{
+              this.error_interface = false;
+              this.errorMessageInterface = ""
             }
+            // if (this.$refs.form.validate()) {
+            //   this.servers_data.push(this.editedItem);
+            //   this.close();
+            // }
           }
         },
 
         submitConfiguration() {
-          console.log("true");
+          // console.log("true");
         },
       },
       vuetify: new Vuetify({
