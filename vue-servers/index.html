@@ -14,6 +14,8 @@
   <link href="../base1/roboto.css" rel="stylesheet" />
   <link href="../base1/vuetify.min.css" rel="stylesheet" />
 
+  <script src="../base1/vue-loader.js"></script>
+  <script src="./ServerDialog.vue"></script>
   <script src="../base1/jquery.js"></script>
   <script src="../base1/cockpit.js"></script>
   <script src="../*/po.js"></script>
@@ -47,6 +49,7 @@
                     <!-- CONFIGURED TAB -->
                     <v-card flat>
                       <v-card-text>NOT IMPLEMENTED YET</v-card-text>
+                      <server-dialog></server-dialog>
                     </v-card>
                   </v-tab-item>
                   <v-tab-item>
@@ -418,9 +421,9 @@
               value: "external",
             },
           ],
+
           stringRules: [
-            (v) => !!v || "This field is required",
-            (v) => v == 30 || "Name must be less than 30 characters",
+            (v) => !!v || "This field is required"
           ],
           editedIndex: -1,
 
@@ -450,6 +453,9 @@
 
           servers_data: [],
         };
+      },
+      components: {
+        ServerDialog: window.httpVueLoader('./ServerDialog.vue')
       },
       computed: {
         formTitle() {
@@ -675,8 +681,8 @@
 
         editItem(item) {
           this.editedIndex = this.servers_data.indexOf(item);
-          this.editedItem = Object.assign({}, item);
-
+          this.editedItem = JSON.parse(JSON.stringify(item));
+          // Object.assign({}, item)
           // console.log(this.editedItem);
           this.dialog = true;
         },
