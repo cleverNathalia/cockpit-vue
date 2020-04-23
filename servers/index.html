@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title translatable="yes">SERVERS</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../base1/patternfly.css" rel="stylesheet" />
+    <link href="../shell/index.css" rel="stylesheet" />
+    <link href="../../static/branding.css" rel="stylesheet" />
+    <script src="../base1/jquery.js"></script>
+    <script src="../base1/cockpit.js"></script>
+    <script src="../*/po.js"></script>
+    <script src="../manifests.js"></script>
+    <script src="../dashboard/dashboard.js"></script>
+</head>
+
+<body>
+    <div class="container-fluid">
+
+        <br />
+        <div class="row">
+            <div class="col-md-12">
+                <!-- <div class="panel panel-default" id="dashboard-hosts">
+                    <div class="panel-heading"> -->
+                <!-- <span translate>Servers</span> -->
+                <h2>Servers</h2>
+                <!-- <div class="float-right p-6">
+                        </div> -->
+                <!-- </div>
+                </div> -->
+            </div>
+        </div>
+        <div class="row pl-2">
+            <div class="col-md-12 col-lg-12">
+                <h3>
+                    Unconfigured Servers
+                    <!-- ADD SERVER - BUTTON PLUS -->
+                    <button class="btn btn-primary servers-privileged fa fa-plus mb-1 ml-2" id="server-add"
+                        aria-label="Add Server" title="Add Server"></button>
+                </h3>
+
+
+                <!-- UNCONFIGURED SERVERS -->
+                <div id="unconfigured_servers_list" class="list-group w-125"></div>
+            </div>
+        </div>
+        <div class="row pl-2">
+            <div class="col-md-12">
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <button id="write_state" class="btn btn-primary" title="Write server state file">Write State</button>
+            </div>
+        </div>
+
+        <script id="dashboard-hosts-tmpl" type="x-template/mustache">
+        {{#machines}}
+            {{! state can be 'failed' or 'connected' }}
+            <a data-address="{{address}}" class="list-group-item {{state}}"
+                data-color="{{ color }}" target="_parent" href="/@{{address}}">
+                <button class="btn btn-danger edit-button servers-privileged pficon btn-delete pficon-delete delete-{{address}}"></button>
+                <button class="btn btn-default edit-button servers-privileged pficon pficon-edit"></button>
+                <img class="host-avatar {{avatar_display}}" role="{{aria_role}}" alt="{{alt_text}}" title="{{alt_text}}" src="{{render_avatar}}">
+                <div class="spinner {{connecting_display}}"></div>
+                <div class="os">{{os}}</div>
+                <span class="host-label">{{label}}
+                    <span class="reconnecting {{connecting_display}}"
+                        translatable="yes">Lost connection. Trying to reconnect</span></span>
+            </a>
+        {{/machines}}
+      </script>
+
+
+
+        <!-- MODAL POPUP - ADD SERVER -->
+        <div class="modal" id="dashboard_setup_server_dialog" tabindex="-1" role="dialog" data-backdrop="static">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" \n aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" translatable="yes">
+                            Add Server
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="servicetag">ServiceTag:</label>
+                            <input id="servicetag" type="name" class="form-control" />
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label for="hostname">Hostname:</label>
+                            <input id="hostname" type="name" class="form-control" />
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label for="hostclass">HostClass:</label>
+                            <select id="hostclass" class="form-control">
+                                <option>master</option>
+                                <option>masterReplica</option>
+                                <option>minion</option>
+                            </select>
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label>Interface:</label>
+                            <div>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">IP</th>
+                                            <th scope="col">DNSalias</th>
+                                            <th scope="col">Network</th>
+                                            <th>
+                                                <button class="btn btn-primary fa fa-plus" id="add_interface"
+                                                    title="Add Interface"></button>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="interface_body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label for="gateway">Default Gateway:</label>
+                            <input id="gateway" type="name" class="form-control" />
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label for="install_type">Install Type:</label>
+                            <select id="install_type" class="form-control">
+                                <option>netboot</option>
+                                <option>netinstall-auto-with-reboot</option>
+                                <option>netinstall-auto-without-reboot</option>
+                                <option>netinstall-manual</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="cancel_add_server" class="btn btn-default" data-dismiss="modal" translatable="yes">
+                            Cancel
+                        </button>
+                        <button id="add_server" class="btn btn-primary" translatable="yes">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP - EDIT SERVER -->
+    <div class="modal" id="host-edit-dialog" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" translate>Edit Server</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="servicetag">ServiceTag:</label>
+                        <input id="servicetag_edit" type="name" class="form-control" />
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <label for="hostname">Hostname:</label>
+                        <input id="hostname_edit" type="name" class="form-control" />
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <label for="hostclass_edit">HostClass:</label>
+                        <select id="hostclass_edit" class="form-control">
+                            <option>master</option>
+                            <option>masterReplica</option>
+                            <option>minion</option>
+                        </select>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <label>Interface:</label>
+                        <div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">IP</th>
+                                        <th scope="col">DNSalias</th>
+                                        <th scope="col">Network</th>
+                                        <th>
+                                            <button class="btn btn-primary fa fa-plus" id="add_interface_edit"
+                                                title="Add Interface"></button>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="interface_body_edit"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <label for="gateway_edit">Default Gateway:</label>
+                        <input id="gateway_edit" type="name" class="form-control" />
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <label for="install_type_edit">Install Type:</label>
+                        <select id="install_type_edit" class="form-control">
+                            <option>netboot</option>
+                            <option>netinstall-auto-with-reboot</option>
+                            <option>netinstall-auto-without-reboot</option>
+                            <option>netinstall-manual</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="server_edit_cancel" class="btn btn-default" data-dismiss="modal" translatable="yes">
+                        Cancel
+                    </button>
+                    <button id="server_edit_save" class="btn btn-primary" id="host-edit-apply" translatable="yes">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .mb-1 {
+            margin-bottom: 1rem;
+        }
+
+        .ml-8 {
+            margin-left: 8px;
+        }
+
+        .indent {
+            margin-left: 30px;
+        }
+
+        .border {
+            border-style: solid;
+            border-width: 1px;
+            border-color: darkgray;
+            border-radius: 2px;
+            padding: 10px;
+        }
+
+        .text-align-end {
+            text-align: end;
+        }
+
+        .mt-4 {
+            margin-top: 4px;
+        }
+
+        .float-right {
+            float: right;
+        }
+
+        .inline-block {
+            display: inline-block;
+        }
+
+        .inline {
+            display: inline;
+        }
+
+        .pr-14 {
+            padding-right: 14px;
+        }
+
+        .p-6 {
+            padding: 6px;
+        }
+
+        button {
+            border-radius: 4px !important;
+        }
+
+        .outlined {
+            border: 2px solid #0088ce;
+            background-color: white;
+            padding: 6px;
+            margin-top: 12px;
+        }
+
+        .outlined:hover {
+            background-color: #0088ce;
+            color: white;
+        }
+
+        .w-75 {
+            width: 75rem;
+        }
+
+        .w-125 {
+            width: 125rem;
+        }
+
+        .pr-6 {
+            padding-right: 6px;
+        }
+
+        .pl-2 {
+            padding-left: 2rem;
+        }
+
+        .ml-2 {
+            margin-left: 2rem;
+        }
+
+        .mr-1 {
+            margin-right: 1rem;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            sessionStorage.clear();
+            var new_servers_data = [];
+            var server_list_item = {};
+            var server_list_item_index = Number;
+            var servers_json = new Object();
+            var where_is_servers_json = ""; 
+
+
+            // ============================================================= SERVER LIST =======================
+
+            //POPULATE THE UNCONFIGURED SERVERS LIST
+            function populate_unconfig_servers(populate_data, index) {
+                const unconfig_item = `<div id="unconfig_item_${index}" class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div>
+                            <h6 class="inline"><label class="pr-6">Service Tag: </label>${populate_data.ServiceTag}</h6>
+                            
+                            <button class="btn btn-danger fa fa-trash inline float-right" id="server-delete" aria-label="Delete Server"
+                                title="Delete Server"></button>
+
+                            <button class="btn fa fa-edit inline float-right mr-1" id="server-edit" aria-label="Edit Server"
+                                title="Edit Server"></button>
+
+                        </div>
+                        <div>
+                            <h4 class="inline pr-14">${populate_data.HostName} | ${populate_data.HostClass}</h4>
+                            <h6 class="inline pr-14"><label class="pr-6">Gateway: </label>${populate_data.Gateway}</h6>
+                            <h6 class="inline"><label class="pr-6">Install Type: </label>${populate_data.InstallType}</h6>
+                        </div>
+                        <button class="outlined" type="button" data-toggle="collapse" data-target="#collapseInterfaces_${index}"
+                            aria-expanded="false" aria-controls="collapseExample">
+                            Interfaces
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <div class="collapse" id="collapseInterfaces_${index}">
+                            <div class="card card-body mt-4 w-75">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">IP</th>
+                                            <th scope="col">DNSalias</th>
+                                            <th scope="col">Network</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id='interfaces_list_${index}'>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>`;
+
+                $("#unconfigured_servers_list").append(unconfig_item);
+
+                for (let i = 0; i < populate_data.Interface.length; i++) {
+
+                    const interface_item = `<tr>
+                                            <td>${populate_data.Interface[i].Name}</td>
+                                            <td>${populate_data.Interface[i].IP}</td>
+                                            <td>${populate_data.Interface[i].DNSAlias}</td>
+                                            <td>${populate_data.Interface[i].Network}</td>
+                                        </tr>`;
+
+                    $("#interfaces_list_" + index).append(interface_item);
+                }
+            };
+
+
+            //UPDATE THE UNCONFIGURED SERVERS LIST
+            function update_unconfig_servers(new_servers_data) {
+                $("#unconfigured_servers_list").empty();
+                for (let i = 0; i < new_servers_data.length; i++) {
+                    populate_unconfig_servers(new_servers_data[i], i);
+                }
+                console.log(new_servers_data);
+            };
+
+            // REMOVES NEW SERVER
+            $("#unconfigured_servers_list").on("click", "#server-delete", function () {
+                var server_list_item = $(this).parents(".list-group-item").attr("id").split("_");
+
+                new_servers_data.splice(server_list_item[2], 1);
+
+                update_unconfig_servers(new_servers_data);
+            });
+
+            // ============================================================= SERVER ADD - MODAL POPUP =======================
+
+            // OPENS MODAL POPUP - SERVER ADD
+            $("#server-add").click(function () {
+                $("#dashboard_setup_server_dialog").modal("show");
+            });
+
+            // CANCEL MODAL POPUP - SERVER ADD 
+            $("#cancel_add_server").click(function () {
+                $("#interface_body").empty();
+                sessionStorage.clear();
+            });
+
+            //CLEARS FIELDS MODAL POPUP - SERVER ADD
+            function clear_add_fields() {
+                $("#servicetag").val("");
+                $("#hostname").val("");
+                $("#gateway").val("");
+            };
+
+            //ADD NEW SERVER
+            $("#add_server").click(function () {
+                // Get the input data and set it in variables
+                var service_tag = $("#servicetag").val(),
+                    host_name = $("#hostname").val(),
+                    host_class = $("#hostclass").children("option:selected").val(),
+                    gateway = $("#gateway").val(),
+                    install_type = $("#install_type").children("option:selected").val(),
+                    interface_data,
+                    interface_array = new Array(),
+                    interface_object = new Object(),
+                    add_object = new Object(),
+                    interface_title = ["Name", "IP", "DNSAlias", "Network"];
+
+                interface_data = $("#interface_body").find("tr");
+
+                //Get the interfaces
+                if (interface_data.length != 0) {
+                    for (let i = 0; i < interface_data.length; i++) {
+
+                        for (let j = 0; j < interface_data[i].cells.length - 1; j++) {
+
+                            interface_object[interface_title[j]] = interface_data[i].cells[j].childNodes[0].value;
+                        }
+
+                        interface_array[i] = interface_object;
+                        interface_object = {};
+                    }
+
+
+                    add_object.HostClass = host_class;
+                    add_object.HostName = host_name;
+                    add_object.Interface = interface_array;
+                    add_object.ServiceTag = service_tag;
+                    add_object.Gateway = gateway;
+                    add_object.InstallType = install_type;
+
+                    //Add it to the global servers array
+                    new_servers_data.push(add_object);
+
+                } else {
+                    add_object.HostClass = host_class;
+                    add_object.HostName = host_name;
+                    add_object.Interface = {};
+                    add_object.ServiceTag = service_tag;
+                    add_object.Gateway = gateway;
+                    add_object.InstallType = install_type;
+
+                    //Add it to the global servers array
+                    new_servers_data.push(add_object);
+
+                }
+
+                //Clear the fields
+                $("#interface_body").empty();
+                sessionStorage.clear();
+                $("#dashboard_setup_server_dialog").modal("hide");
+                clear_add_fields();
+
+                update_unconfig_servers(new_servers_data);
+            });
+
+            // APPENDS MULTIPLE INTERFACES
+            $("#add_interface").click(function () {
+                if (typeof (Storage) !== "undefined") {
+                    if (sessionStorage.getItem('interface_count')) {
+                        sessionStorage.setItem('interface_count', Number(sessionStorage.getItem('interface_count')) + 1);
+                    } else {
+                        sessionStorage.setItem('interface_count', 1);
+                    }
+                    const newTr = `<tr id="interface_${sessionStorage.getItem('interface_count')}"><td aria-placeholder='Name' contenteditable="true"><input id="interface_name_${sessionStorage.getItem('interface_count')}" type="name" class="form-control"></td>
+                                            <td aria-placeholder='IP' contenteditable="true"><input id="interface_ip_${sessionStorage.getItem('interface_count')}" type="name" class="form-control"></td>
+                                            <td aria-placeholder='DNSalias' contenteditable="true"><input id="interface_dns_${sessionStorage.getItem('interface_count')}" type="name" class="form-control"></td>
+                                            <td><select id="interface_network_${sessionStorage.getItem('interface_count')}" class="form-control">
+                                                    <option>internal</option>
+                                                    <option>capture</option>
+                                                    <option>external</option>
+                                                </select></td>
+                                                <td>
+   <button id="remove_interface" type="button" class="btn btn-danger fa fa-trash"></button>
+  </td>
+                                           </tr>`;
+                    $("#interface_body").append(newTr);
+                }
+            });
+
+            // REMOVES MULTIPLE INTERFACES
+            $("#interface_body").on("click", "#remove_interface", function () {
+                $(this)
+                    .parents("tr")
+                    .detach();
+            });
+
+
+            // ============================================================= SERVER EDIT - MODAL POPUP =======================
+
+            // CANCEL MODAL POPUP - SERVER EDIT 
+            $("#server_edit_cancel").click(function () {
+                $("#interface_body_edit").empty();
+                sessionStorage.clear();
+                server_list_item = {};
+                server_list_item_index = null;
+            });
+
+            //CLEARS FIELDS MODAL POPUP - SERVER EDIT
+            function clear_edit_fields() {
+                $("#servicetag_edit").val("");
+                $("#hostname_edit").val("");
+                $("#gateway_edit").val("");
+            };
+
+            // POPULATE DATA IN FIELDS - SERVER EDIT
+            $("#unconfigured_servers_list").on("click", "#server-edit", function () {
+
+                $("#host-edit-dialog").modal("show");
+
+                server_list_item = new_servers_data[$(this).parents(".list-group-item").attr("id").split("_")[2]];
+                server_list_item_index = $(this).parents(".list-group-item").attr("id").split("_")[2];
+
+                $("#servicetag_edit").val(server_list_item.ServiceTag);
+                $("#hostname_edit").val(server_list_item.HostName);
+                $("#hostclass_edit").val(server_list_item.HostClass);
+                $("#gateway_edit").val(server_list_item.Gateway);
+                $("#install_type_edit").val(server_list_item.InstallType);
+
+                if (typeof (Storage) !== "undefined") {
+
+                    if (sessionStorage.getItem('interface_count_edit')) {
+                        sessionStorage.setItem('interface_count_edit', Number(sessionStorage.getItem('interface_count_edit')) + 1);
+                    } else {
+                        sessionStorage.setItem('interface_count_edit', 1);
+                    }
+
+                    for (let i = 0; i < server_list_item.Interface.length; i++) {
+
+                        const newTr = `<tr id="interface_edit_${sessionStorage.getItem('interface_count_edit')}"><td aria-placeholder='Name' contenteditable="true"><input id="interface_name_edit_${sessionStorage.getItem('interface_count_edit')}" value="${server_list_item.Interface[i].Name}" type="name" class="form-control"></td>
+                                            <td aria-placeholder='IP' contenteditable="true"><input id="interface_ip_edit_${sessionStorage.getItem('interface_count_edit')}" value="${server_list_item.Interface[i].IP}" type="name" class="form-control"></td>
+                                            <td aria-placeholder='DNSalias' contenteditable="true"><input id="interface_dns_edit_${sessionStorage.getItem('interface_count_edit')}" value="${server_list_item.Interface[i].DNSAlias}" type="name" class="form-control"></td>
+                                            <td><select id="interface_network_edit_${sessionStorage.getItem('interface_count_edit')}" value="${server_list_item.Interface[i].Network}" class="form-control">
+                                                    <option>internal</option>
+                                                    <option>capture</option>
+                                                    <option>external</option>
+                                                </select></td>
+                                                <td>
+   <button id="remove_interface_edit" type="button" class="btn btn-danger fa fa-trash"></button>
+  </td>
+                                           </tr>`;
+
+                        $("#interface_body_edit").append(newTr);
+
+                        sessionStorage.setItem('interface_count_edit', Number(sessionStorage.getItem('interface_count_edit')) + 1);
+                    }
+                }
+            });
+
+            // ADD INTERFACE - SERVER EDIT
+            $("#add_interface_edit").click(function () {
+                if (typeof (Storage) !== "undefined") {
+
+                    if (sessionStorage.getItem('interface_count_edit')) {
+                        sessionStorage.setItem('interface_count_edit', Number(sessionStorage.getItem('interface_count_edit')) + 1);
+                    } else {
+                        sessionStorage.setItem('interface_count_edit', 1);
+                    }
+
+                    const newTr = `<tr id="interface_edit_${sessionStorage.getItem('interface_count_edit')}"><td aria-placeholder='Name' contenteditable="true"><input id="interface_name_edit_${sessionStorage.getItem('interface_count_edit')}" type="name" class="form-control"></td>
+                    <td aria-placeholder='IP' contenteditable="true"><input id="interface_ip_edit_${sessionStorage.getItem('interface_count_edit')}" type="name" class="form-control"></td>
+                    <td aria-placeholder='DNSalias' contenteditable="true"><input id="interface_dns_edit_${sessionStorage.getItem('interface_count_edit')}" type="name" class="form-control"></td>
+                    <td><select id="interface_network_edit_${sessionStorage.getItem('interface_count_edit')}" class="form-control">
+                            <option>internal</option>
+                            <option>capture</option>
+                            <option>external</option>
+                        </select></td>
+                        <td>
+<button id="remove_interface_edit" type="button" class="btn btn-danger fa fa-trash"></button>
+</td>
+                   </tr>`;
+
+                    $("#interface_body_edit").append(newTr);
+
+                }
+            });
+
+            // REMOVES MULTIPLE INTERFACES - SERVER EDIT
+            $("#interface_body_edit").on("click", "#remove_interface_edit", function () {
+                $(this)
+                    .parents("tr")
+                    .detach();
+            });
+
+            // SAVE CHANGES - SERVER EDIT
+            $("#server_edit_save").click(function () {
+
+                // Get the input data and set it in variables
+                var service_tag = $("#servicetag_edit").val(),
+                    host_name = $("#hostname_edit").val(),
+                    host_class = $("#hostclass_edit").children("option:selected").val(),
+                    gateway = $("#gateway_edit").val(),
+                    install_type = $("#install_type_edit").children("option:selected").val(),
+                    interface_data,
+                    interface_array = new Array(),
+                    interface_object = new Object(),
+                    add_object = new Object(),
+                    interface_title = ["Name", "IP", "DNSAlias", "Network"];
+
+                interface_data = $("#interface_body_edit").find("tr");
+
+                //Get the interfaces
+                if (interface_data.length != 0) {
+                    for (let i = 0; i < interface_data.length; i++) {
+
+                        for (let j = 0; j < interface_data[i].cells.length - 1; j++) {
+
+                            interface_object[interface_title[j]] = interface_data[i].cells[j].childNodes[0].value;
+                        }
+
+                        interface_array[i] = interface_object;
+                        interface_object = {};
+                    }
+
+                    add_object.HostClass = host_class;
+                    add_object.HostName = host_name;
+                    add_object.Interface = interface_array;
+                    add_object.ServiceTag = service_tag;
+                    add_object.Gateway = gateway;
+                    add_object.InstallType = install_type;
+
+                    //Remove current item from array
+                    new_servers_data.splice(server_list_item_index, 1);
+
+                    //Add it to the global servers array
+                    new_servers_data.push(add_object);
+
+                } else {
+                    add_object.HostClass = host_class;
+                    add_object.HostName = host_name;
+                    add_object.Interface = interface_array;
+                    add_object.ServiceTag = service_tag;
+                    add_object.Gateway = gateway;
+                    add_object.InstallType = install_type;
+
+                    //Remove current item from array
+                    new_servers_data.splice(server_list_item_index, 1);
+
+                    //Add it to the global servers array
+                    new_servers_data.push(add_object);
+                }
+
+                //Clear the fields
+                $("#interface_body_edit").empty();
+                sessionStorage.clear();
+                $("#host-edit-dialog").modal("hide");
+                clear_edit_fields();
+
+                update_unconfig_servers(new_servers_data);
+
+            });
+
+
+            // ============================================================= WRITE DATA TO JSON =======================
+
+
+            // function find_server_json() {
+            //     var create_file = cockpit.spawn(["find", "/usr/share/cockpit/servers/servers.json"]);
+            
+            //     create_file.stream(function (data) {
+            //         where_is_servers_json = data;
+            //     });
+
+            //     return where_is_servers_json;
+            // };
+
+            // WRITE SERVER.SLS FILE
+            $("#write_state").click(function () {
+
+                // remove_server_json();
+                
+                // create_server_json();
+                // console.log("yes");
+
+                servers_json.Server = new_servers_data;
+                console.log(servers_json);
+
+
+                // THIS CODE BELOW WORKS TO CREATE A SERVER.SLS FILE
+                // var create_file = cockpit.spawn(["touch", "/usr/share/cockpit/servers/cockpit.sls"]);
+                // create_file.stream();
+
+                // console.log(find_server_json());
+
+
+                // console.log(find_server_json());
+            });
+
+            function create_server_json() {
+                // var find_file = cockpit.spawn(["find", "/usr/share/cockpit/servers/servers.json"]);
+                // find_file.stream(function(data){
+                //     console.log(data);
+                //     if(data){
+
+                //     }
+                // });
+                
+                // var remove_file = cockpit.spawn(["rm", "/usr/share/cockpit/servers/servers.json"]);
+                // remove_file.stream();
+                // var create_file = cockpit.spawn(["touch", "/usr/share/cockpit/servers/servers.json"]);
+                // create_file.stream();
+            }
+            function remove_server_json() {
+                
+            }
+
+
+
+
+            // $("#server-edit").click(function () {
+            //     $("#host-edit-dialog").modal("show");
+            // });
+
+        }); 
+    </script>
+</body>
+
+</html>

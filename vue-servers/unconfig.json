@@ -1,0 +1,285 @@
+{
+    "Common": {
+
+    },
+    "CommonLoggerHosts": {
+
+    },
+    "CustomRoutes": {
+
+    },
+    "MachineClass": [
+     
+    ],
+    "MySQL": {
+   
+    },
+    "Prometheus": {
+ 
+    },
+    "RemoteHosts": {
+ 
+    },
+    "Server": [
+      {
+        "BladeIndex": null,
+        "FlippedFabric": false,
+        "HostClass": 1,
+        "Hostname": "111",
+        "Interface": [
+          {
+            "IP": ["44.44.44.44/16"],
+            "MAC": "21:21:21:21:46:21",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["21.21.21.16"],
+            "MAC": "32:22:22:22:46:84",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": ""
+      },
+      {
+        "BladeIndex": 2,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "fds",
+        "Interface": [
+          {
+            "IP": ["10.33.33.33"],
+            "MAC": "32:32:32:32:32:32",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["212.22.11.31"],
+            "MAC": "00:43:43:43:43:43",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": "2"
+      },
+      {
+        "BladeIndex": 3,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "Me",
+        "Interface": [
+          {
+            "IP": ["22.22.22.22"],
+            "MAC": "22:22:22:22:3b:22",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["43.43.43.33"],
+            "MAC": "d3:d3:d3:d3:3b:76",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": "3"
+      },
+      {
+        "BladeIndex": 5,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "Great",
+        "Interface": [
+          {
+            "IP": ["33.33.33.33"],
+            "MAC": "33:33:33:fd:33:d0",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["172.88.88.88"],
+            "MAC": "14:14:14:14:14:d2",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": "5"
+      },
+      {
+        "BladeIndex": 6,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "Mine",
+        "Interface": [
+          {
+            "IP": ["14.14.14.6"],
+            "MAC": "11:11:11:fc:11:40",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["172.16.41.36"],
+            "MAC": "5c:26:0a:fc:3b:42",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": "6"
+      },
+      {
+        "BladeIndex": 7,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "Oh no",
+        "Interface": [
+          {
+            "IP": ["00.00.00.7"],
+            "MAC": "00:26:00:00:00:ec",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["555.32.32.32"],
+            "MAC": "55:55:55:55:3b:ee",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": "7"
+      },
+      {
+        "BladeIndex": 8,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "Help",
+        "Interface": [
+          {
+            "IP": ["43.43.0.8"],
+            "MAC": "43:43:43:43:43:b0",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["172.16.41.38"],
+            "MAC": "54:9f:35:1a:a0:b2",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": "8"
+      },
+      {
+        "BladeIndex": 1,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "Awesome",
+        "Interface": [
+          {
+            "IP": ["10.41.1.1"],
+            "MAC": "88:98:11:11:11:11",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["54.54.54.40"],
+            "MAC": "32:98:33:33:33:35",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": "01a"
+      },
+      {
+        "BladeIndex": 2,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "Maybe",
+        "Interface": [
+          {
+            "IP": ["44.11.11.2"],
+            "MAC": "33:98:33:b2:33:33",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["333.16.33.41"],
+            "MAC": "44:44:44:44:33:49",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": "01b"
+      },
+      {
+        "BladeIndex": 3,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "I care",
+        "Interface": [
+          {
+            "IP": ["44.41.44.44"],
+            "MAC": "22:98:22:22:22:27",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["22.22.41.42"],
+            "MAC": "88:88:36:88:2c:29",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "",
+        "SerialNumber": "",
+        "Slot": "01c"
+      },
+      {
+        "BladeIndex": 4,
+        "FlippedFabric": false,
+        "HostClass": 3,
+        "Hostname": "Dont",
+        "Interface": [
+          {
+            "IP": ["88.88.88.4"],
+            "MAC": "66:66:36:66:86:66",
+            "Name": "eth0",
+            "Network": "internal"
+          },
+          {
+            "IP": ["66.16.66.43"],
+            "MAC": "55:55:55:ac:86:77",
+            "Name": "eth1",
+            "Network": "external"
+          }
+        ],
+        "ProductName": "EX-MAC eth0 10:55:55:b2:dd:dd",
+        "SerialNumber": "EX-MAC eth1 55:55:36:b2:55:31",
+        "Slot": "01d"
+      }     
+    ],
+    "ServiceManager": {
+
+    },
+    "Timescaledb": {
+
+    }
+  }
+  

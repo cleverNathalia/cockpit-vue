@@ -1,0 +1,138 @@
+{
+    "Common": {
+
+    },
+    "CommonLoggerHost": {
+
+    },
+    "MachineClass": [
+        
+    ],
+    "MasterReplication": {
+
+    },
+    "Monocle": {
+
+    },
+    "MySQL": {
+   
+    },
+    "Prometheus": {
+    },
+    "Server": [
+        {
+            "BladeIndex": null,
+            "FlippedFabric": false,
+            "HostClass": 1,
+            "Hostname": "Milo",
+            "Interface": [
+                {
+                    "IP": [
+                        "32.67.32.03"
+                    ],
+                    "MAC": "77:26:77:9a:77:77",
+                    "Name": "eth0",
+                    "Network": "internal"
+                },
+                {
+                    "IP": [
+                        "434.16.43.204"
+                    ],
+                    "MAC": "77:77:77:77:83:66",
+                    "Name": "eth1",
+                    "Network": "external"
+                }
+            ],
+            "ProductName": "",
+            "SerialNumber": "",
+            "Slot": ""
+        },
+        {
+            "BladeIndex": null,
+            "FlippedFabric": false,
+            "HostClass": 3,
+            "Hostname": "Bread",
+            "Interface": [
+                {
+                    "IP": [
+                        "33.33.200.33"
+                    ],
+                    "MAC": "33:24:33:33:33:43",
+                    "Name": "eth0",
+                    "Network": "internal"
+                },
+                {
+                    "IP": [
+                        "545.54.67.55"
+                    ],
+                    "MAC": "66:11:66:e6:66:9b",
+                    "Name": "eth1",
+                    "Network": "external"
+                }
+            ],
+            "ProductName": "",
+            "SerialNumber": "",
+            "Slot": ""
+        },
+        {
+            "BladeIndex": null,
+            "FlippedFabric": false,
+            "HostClass": 3,
+            "Hostname": "Koos",
+            "Interface": [
+                {
+                    "IP": [
+                        "22.22.200.4"
+                    ],
+                    "MAC": "22:22:22:22:ca:31",
+                    "Name": "eth0",
+                    "Network": "internal"
+                },
+                {
+                    "IP": [
+                        "172.16.434.204"
+                    ],
+                    "MAC": "43:43:43:34:40:42",
+                    "Name": "eth1",
+                    "Network": "external"
+                }
+            ],
+            "ProductName": "",
+            "SerialNumber": "",
+            "Slot": ""
+        },
+        {
+            "BladeIndex": null,
+            "FlippedFabric": false,
+            "HostClass": 3,
+            "Hostname": "Jannie",
+            "Interface": [
+                {
+                    "IP": [
+                        "21.67.32.7"
+                    ],
+                    "MAC": "12:2c:11:22:22:22",
+                    "Name": "eth0",
+                    "Network": "internal"
+                },
+                {
+                    "IP": [
+                        "555.16.12.207"
+                    ],
+                    "MAC": "00:1a:00:17:00:07",
+                    "Name": "eth1",
+                    "Network": "external"
+                }
+            ],
+            "ProductName": "",
+            "SerialNumber": "",
+            "Slot": ""
+        }
+    ],
+    "ServiceManagerss": {
+     
+    },
+    "Times": {
+
+    }
+}
