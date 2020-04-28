@@ -80,13 +80,13 @@
                               hide-details></v-text-field>
                             <v-spacer></v-spacer>
 
+                            <!-- ADD / EDIT POPUP -->
                             <v-dialog v-model="dialog" max-width="1000px" persistent>
                               <template v-slot:activator="{ on }">
                                 <!-- NEW SERVER -->
                                 <v-btn color="primary" dark class="mb-2" v-on="on">New Server</v-btn>
                               </template>
 
-                              <!-- ADD / EDIT POPUP -->
                               <v-card>
                                 <v-card-title>
                                   <span class="headline">{{ formTitle }}</span>
@@ -97,15 +97,41 @@
                                     <v-row>
                                       <v-col cols="12" sm="12" md="12">
                                         <v-form ref="form" lazy-validation>
+                                          <!-- ALERT MESSAGE POPUP -->
+                                          <v-alert v-model="alert_popup" border="left" colored-border type="warning"
+                                            elevation="2" dismissible>
+                                            {{ alert_message_popup }}
+                                          </v-alert>
                                           <!-- HOSTNAME -->
                                           <v-text-field v-model="editedItem.Hostname" label="*Hostname" type="text"
                                             required :rules="requiredRules"></v-text-field>
+                                          <!-- ALIASES -->
+                                          <h3 class="pt-2 pb-2">
+                                            Aliases
+                                          </h3>
+                                          <v-combobox v-model="editedItem.Aliases" :hide-no-data="!searchAliases"
+                                            :search-input.sync="searchAliases" :items="aliasItems" hide-selected
+                                            label="Type in an alias name and press enter." multiple small-chips solo>
+                                            <template v-slot:selection="{ attrs, item, parent, selected }">
+                                              <v-chip :input-value="selected" label small>
+                                                <span class="pr-2">
+                                                  {{ item }}
+                                                </span>
+                                                <v-icon small @click="parent.selectItem(item)">fas fa-times</v-icon>
+                                              </v-chip>
+                                            </template>
+                                          </v-combobox>
+
                                           <!-- SERVICE_TAG -->
                                           <v-text-field v-model="editedItem.SerialNumber" label="*ServiceTag"
                                             type="text" required :rules="requiredRules"></v-text-field>
                                           <!-- HOSTCLASS -->
                                           <v-select v-model="editedItem.HostClass" :items="hostclass_options"
                                             :rules="requiredRules" label="*HostClass"></v-select>
+
+                                          <!-- INSTALLMETHOD -->
+                                          <v-select v-model="editedItem.InstallMethod" :items="installmethod_options"
+                                            label="InstallMethod"></v-select>
 
                                           <!-- INTERFACES -->
                                           <v-row>
@@ -126,6 +152,27 @@
                                             @remove="removeInterface(index)">
                                           </interface>
                                           <br /><br />
+
+                                          <!-- STORAGE DEVICES -->
+                                          <v-row>
+                                            <v-col cols="12">
+                                              <h3>
+                                                Storage Devices
+                                                <v-icon small class="ml-2 pa-2" @click="addStorageDevice">
+                                                  fas fa-plus
+                                                </v-icon>
+                                              </h3>
+                                              <v-alert v-model="error_storage_device" dense outlined type="error">
+                                                {{ errorMessageStorageDevice }}
+                                              </v-alert>
+                                            </v-col>
+                                          </v-row>
+                                            <storage-device  v-for="(device, index) in editedItem.Storage" :device="device"
+                                            :devices="editedItem.Storage" @remove="removeStorageDevice(index)">
+                                          </storage-device>
+                      
+                                          <br /><br />
+
                                           <!-- BLADEINDEX -->
                                           <v-text-field v-model="editedItem.BladeIndex" label="BladeIndex"
                                             type="number"></v-text-field>
@@ -230,6 +277,124 @@
   <script src="../base1/vuex.min.js"></script>
 
   <script>
+    // STORAGE DEVICE COMPONENT - POPUP
+    Vue.component("storage-device", {
+      props: ["device", "devices"],
+      data() {
+        return {};
+      },
+      methods:{
+        addPartition(){
+          return "";
+        }
+      },
+      template: `
+      <v-card class='ma-2 pa-2'>
+        <v-row>
+          <v-col cols="4">
+            <v-text-field
+           label="Device Name"
+           v-model="device.Device"
+            />
+            </v-col>
+            <v-col cols="8" class="text-right">
+            <v-icon color='red lighten-1' class="ml-2 mt-4 mr-2" small  @click="$emit('remove')">
+                fas fa-minus
+              </v-icon>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <h3>
+              Partitions:
+              <v-icon small class="ml-2 pa-2" 
+            @click="addPartition">
+                fas fa-plus
+            </v-icon>
+            </h3>
+          </v-col>
+        </v-row>
+        <partitions v-for="(partition, index) in device.Partitions" 
+        :partition="partition"
+        :partitions="device.Partitions" 
+        @remove="removeStorageDevice(index)">
+        </partitions>
+        </v-card>
+        `,
+    });
+
+    // PARTITIONS - STORAGE DEVICE COMPONENT - POPUP
+    Vue.component("partitions", {
+      props: ["partition", "partitions"],
+      data() {
+        return {
+          filesystemTypes:["ext4", "xfs"],
+        };
+      },
+      computed: {
+        partitionTypes() {
+
+          const partitions = this.partitions.map(
+            (_partition) => _partition.Type
+          );
+
+          console.log(partitions);
+
+           return [
+            {
+              text: "Custom",
+              value: "custom",
+            },
+            ...(partitions.filter((value) => value === "root").length < 1 ||
+              this.partition.Type === "root"
+              ? [{ text: "Root", value: "root" }]
+              : []),
+            ...(partitions.filter((value) => value === "swap").length < 1 ||
+            this.partition.Type === "swap"
+              ? [{ text: "Swap", value: "swap" }]
+              : []),
+          ];
+
+        },
+      },
+      template: `
+        <v-row>
+          <v-col>
+            <v-select
+              label="Partition Type"
+              v-model="partition.Type"
+              :items="partitionTypes"
+              />
+          </v-col>
+          <v-col>
+              <v-text-field
+              label="Partition Label"
+              v-model="partition.Label"
+            />
+          </v-col>
+          <v-col>
+            <v-select
+              label="Filesystem Type"
+              v-model="partition.Filesystem"
+              :items="filesystemTypes"
+              />
+          </v-col>
+          <v-col>
+              <v-text-field
+              label="Mount Point" 
+              v-model="partition.MountPoint"
+            />
+          </v-col>
+          <v-col cols="2">
+            <v-text-field 
+            label="Size (GB)"
+            type="number"
+            v-model="partition.Size"></v-text-field>
+          </v-col>
+        </v-row>
+        `,
+    });
+
     // INTERFACE COMPONENT - POPUP
     Vue.component("interface", {
       props: ["interface", "interfaces"],
@@ -322,6 +487,8 @@
       data() {
         return {
           selected: [],
+          searchAliases: null,
+          aliasItems: [],
 
           disabledSubmitConfig: true,
 
@@ -347,8 +514,16 @@
           error_interface: false,
           errorMessageInterface: "",
 
+          error_storage_device: false,
+          errorMessageStorageDevice: "",
+
           alert: false,
           alert_message: "",
+
+          alert_popup: false,
+          alert_message_popup: "",
+
+
 
           headers_servers: [
             {
@@ -411,6 +586,28 @@
               value: 3,
             },
           ],
+          installmethod_options: [
+            {
+              text: "None",
+              value: "none",
+            },
+            {
+              text: "Netboot",
+              value: "netboot",
+            },
+            {
+              text: "Netinstall-Auto-With-Reboot",
+              value: "netinstall-auto-with-reboot",
+            },
+            {
+              text: "Netinstall-Auto-Without-Reboot",
+              value: "netinstall-auto-without-reboot",
+            },
+            {
+              text: "Netinstall-Manual",
+              value: "netinstall-manual",
+            },
+          ],
           flippedfabric_option: [
             {
               text: "No",
@@ -440,31 +637,35 @@
 
           editedItem: {
             Hostname: "",
+            Aliases: [],
             SerialNumber: "",
             HostClass: 0,
+            InstallMethod: "",
             BladeIndex: null,
             FlippedFabric: "false",
             ProductName: "",
             Slot: "",
             Interface: [{ IP: null, MAC: null, Name: null, Network: null }],
+            Storage: [{ Device: null, Partitions: [{Type: null, Label: null, Filesystem: null, MountPoint: null, Size: null}] }],
             InternalIP: "",
             InternalMAC: "",
           },
 
           defaultItem: {
             Hostname: "",
+            Aliases: [],
             SerialNumber: "",
             HostClass: 0,
+            InstallMethod: "",
             BladeIndex: null,
             FlippedFabric: "false",
             ProductName: "",
             Slot: "",
             Interface: [{ IP: null, MAC: null, Name: null, Network: null }],
+            Storage: [{ Device: null, Partitions: [{Type: null, Label: null, Filesystem: null, MountPoint: null, Size: null}] }],
             InternalIP: "",
             InternalMAC: "",
           },
-
-          exampleArr: [],
 
           servers_data: [],
           unconfig_data: [],
@@ -494,11 +695,25 @@
         selected: function () {
           this.disabledSubmitConfig = this.selected.length == 0;
         },
+        editedItem(val, prev) {
+
+          if (val.Aliases.length === prev.Aliases.length) return
+
+          this.editedItem.Aliases = val.Aliases.map(v => {
+            if (typeof v === 'string') {
+              v = v
+
+              this.aliasItems.push(v)
+
+            }
+
+            return v
+          })
+        }
       },
       created() {
         this.initialize();
         this.readConfig();
-        
       },
 
       beforeMount() {
@@ -524,8 +739,26 @@
             Network: null,
           });
         },
+        addStorageDevice(){
+          this.editedItem.Storage.push({
+            Device: null,
+            Storage: [
+              {
+                Type: null,
+                Label: null,
+                Filesystem: null,
+                MountPoint: null,
+                Size: null
+              }
+            ]
+          });
+        },
+
         removeInterface(index) {
           this.editedItem.Interface.splice(index, 1);
+        },
+        removeStorageDevice(index){
+          this.editedItem.Storage.splice(index, 1);
         },
 
         async initialize() {
@@ -541,6 +774,12 @@
               this.server_count = this.servers_data.length;
               for (let i = 0; i < content.Server.length; i++) {
                 this.servers_data[i]["Position"] = i;
+                if (content.Server[i].Aliases == undefined) {
+                  this.servers_data[i]["Aliases"] = [];
+                }
+                if (content.Server[i].InstallMethod == undefined) {
+                  this.servers_data[i]["InstallMethod"] = "";
+                }
                 for (let j = 0; j < content.Server[i].Interface.length; j++) {
                   if (content.Server[i].Interface[j].Network == "internal") {
                     this.servers_data[i]["InternalIP"] =
@@ -564,8 +803,6 @@
             .read()
             .done((content, tag) => {
               console.log("Read config.json");
-              console.log(content);
-              console.log(tag);
               this.write_unconfig = content;
             })
             .fail(function (error) {
@@ -610,17 +847,59 @@
             delete this.servers_data[i].InternalMAC;
           }
 
-          cockpit.file("./unconfig.json", { syntax: JSON, superuser: "require" })
-            // .replace(this.unconfig_data)
-            .modify(function (content) {
-              return JSON.stringify(this.unconfig_data);
-            })
+          cockpit.file("/usr/share/cockpit/vue-servers/unconfig.json", { syntax: JSON, superuser: "require" })
+            .replace(this.unconfig_data)
+            // .modify(function (content) {
+
+            //   return content["test"];
+            // })
             .done(function (content, tag) {
               console.log("Replaced unconfig.json data");
             })
             .fail(function (error) {
               console.log("Unable to replace unconfig.json data");
             });
+        },
+
+        searchDuplicates(item) {
+
+          let check = false;
+
+          for (let i = 0; i < this.servers_data.length; i++) {
+            if (this.editedIndex != i) {
+              if (item.Hostname == this.servers_data[i].Hostname || item.SerialNumber == this.servers_data[i].SerialNumber) {
+                return true;
+              }
+            }
+          }
+
+          for (let i = 0; i < this.servers_data.length; i++) {
+            if (this.editedIndex != i) {
+              for (let j = 0; j < this.servers_data[i].Interface.length; j++) {
+                if (check == true) {
+                  break;
+                } else {
+                  for (let k = 0; k < item.Interface.length; k++) {
+                    if (check == true) {
+                      break;
+                    } else {
+                      if (item.Interface[k].IP == this.servers_data[i].Interface[j].IP || item.Interface[k].MAC == this.servers_data[i].Interface[j].MAC) {
+                        check = true;
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          if (check == true) {
+            return true;
+          } else {
+            return false;
+          }
+
         },
 
         save() {
@@ -632,23 +911,27 @@
               //Set Internal interface name to eth0
               this.editedItem.Interface.filter((value) => value.Network === "internal")[0].Name = "eth0";
 
-              console.log(this.servers_data);
-              // console.log(this.servers_data.find(item => item.Hostname == this.editedItem.Hostname));
-              console.log(this.servers_data.find(item => item.Hostname == this.editedItem.Hostname));
-              // for (let i = 0; i < this.servers_data.length; i++) {
-              //   this.servers_data[i].Interface.find(item => item.);
 
-              // }
+              //If the user did not define an installMethod, default to none
+              if (this.editedItem.InstallMethod == "") {
+                this.editedItem.InstallMethod = "none";
+              }
 
-              // Object.assign(
-              //   this.servers_data[this.editedIndex],
-              //   this.editedItem
-              // );
-              // this.update_unconfig_data();
-              // this.initialize();
-              // console.log(this.servers_data);
+              if (this.searchDuplicates(this.editedItem)) {
+                this.alert_popup = true;
+                this.alert_message_popup = "Oops. Some of the information already exists.";
+              } else {
+                Object.assign(
+                  this.servers_data[this.editedIndex],
+                  this.editedItem
+                );
+                this.update_unconfig_data();
+                this.initialize();
+                console.log(this.editedItem.InstallMethod);
 
-              // this.close();
+                this.close();
+              }
+
             } else if (
               this.editedItem.Interface.filter((value) => value.Network === "internal"
               ).length < 1
@@ -670,11 +953,25 @@
               //Set Internal interface name to eth0
               this.editedItem.Interface.filter((value) => value.Network === "internal")[0].Name = "eth0";
 
-              this.servers_data.push(this.editedItem);
-              this.update_unconfig_data();
-              this.initialize();
+              console.log(this.editedItem.InstallMethod == "");
+              //If the user did not define an installMethod, default to none
+              if (this.editedItem.InstallMethod == "") {
+                this.editedItem.InstallMethod = "none";
+              }
 
-              this.close();
+              if (this.searchDuplicates(this.editedItem)) {
+                this.alert_popup = true;
+                this.alert_message_popup = "Oops. Some of the information already exists.";
+              } else {
+                this.servers_data.push(this.editedItem);
+                this.update_unconfig_data();
+                this.initialize();
+
+                console.log(this.editedItem.InstallMethod);
+
+                this.close();
+              }
+
             } else if (
               this.editedItem.Interface.filter(
                 (value) => value.Network === "internal"
@@ -738,11 +1035,12 @@
             if (this.readConfig()) {
 
 
-              cockpit.file("./config.json", { syntax: JSON, superuser: "require" })
-                // .replace(this.write_unconfig)
-                .modify(function (content) {
-                  return JSON.stringify(this.write_unconfig);
-                })
+              cockpit.file("/usr/share/cockpit/vue-servers/config.json", { syntax: JSON, superuser: "require" })
+                .replace(this.write_unconfig)
+                // .modify(function (content) {
+
+                //   return content["user"] = 2;
+                // })
                 .done(function (content, tag) {
                   console.log(content);
                   console.log(tag);

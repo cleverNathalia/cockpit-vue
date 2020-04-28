@@ -25,6 +25,8 @@
             "FlippedFabric": false,
             "HostClass": 1,
             "Hostname": "Milo",
+            "InstallMethod": "none",
+            "Aliases": ["koos"],
             "Interface": [
                 {
                     "IP": [
@@ -43,6 +45,32 @@
                     "Network": "external"
                 }
             ],
+            "Storage": [
+                {
+                    "Device":"myDevice",
+                    "Partitions":[
+                        {
+                            "Type": "swap",
+                            "Label": "ETC_VOL",
+                            "Filesystem": "ext4",
+                            "MountPoint": "/mnt/iets",
+                            "Size": 20
+                        }
+                    ]
+                },
+                {
+                    "Device":"myDevice",
+                    "Partitions":[
+                        {
+                            "Type": "custom",
+                            "Label": "FER",
+                            "Filesystem": "ext4",
+                            "MountPoint": "/braminda",
+                            "Size": 100
+                        }
+                    ]
+                }
+            ],
             "ProductName": "",
             "SerialNumber": "",
             "Slot": ""
@@ -52,6 +80,8 @@
             "FlippedFabric": false,
             "HostClass": 3,
             "Hostname": "Bread",
+            "InstallMethod": "netinstall",
+            "Aliases": ["brood"],
             "Interface": [
                 {
                     "IP": [
@@ -70,6 +100,39 @@
                     "Network": "external"
                 }
             ],
+            "Storage": [
+                {
+                    "Device":"myDevice",
+                    "Partitions":[
+                        {
+                            "Type": "swap",
+                            "Label": "ETC_VOL",
+                            "Filesystem": "ext4",
+                            "MountPoint": "/mnt/iets",
+                            "Size": 20
+                        },
+                        {
+                            "Type": "root",
+                            "Label": "ETC_ROOTI",
+                            "Filesystem": "xfs",
+                            "MountPoint": "/mnt/koos",
+                            "Size": 10
+                        }
+                    ]
+                },
+                {
+                    "Device":"myDevice",
+                    "Partitions":[
+                        {
+                            "Type": "custom",
+                            "Label": "FER",
+                            "Filesystem": "ext4",
+                            "MountPoint": "/braminda",
+                            "Size": 100
+                        }
+                    ]
+                }
+            ],
             "ProductName": "",
             "SerialNumber": "",
             "Slot": ""
@@ -79,6 +142,8 @@
             "FlippedFabric": false,
             "HostClass": 3,
             "Hostname": "Koos",
+            "InstallMethod": "none",
+            "Aliases": [],
             "Interface": [
                 {
                     "IP": [
@@ -97,6 +162,39 @@
                     "Network": "external"
                 }
             ],
+            "Storage": [
+                {
+                    "Device":"myDevice",
+                    "Partitions":[
+                        {
+                            "Type": "swap",
+                            "Label": "ETC_VOL",
+                            "Filesystem": "ext4",
+                            "MountPoint": "/mnt/iets",
+                            "Size": 20
+                        },
+                        {
+                            "Type": "root",
+                            "Label": "ETC_ROOTI",
+                            "Filesystem": "xfs",
+                            "MountPoint": "/mnt/koos",
+                            "Size": 10
+                        }
+                    ]
+                },
+                {
+                    "Device":"myDevice",
+                    "Partitions":[
+                        {
+                            "Type": "custom",
+                            "Label": "FER",
+                            "Filesystem": "ext4",
+                            "MountPoint": "/braminda",
+                            "Size": 100
+                        }
+                    ]
+                }
+            ],
             "ProductName": "",
             "SerialNumber": "",
             "Slot": ""
@@ -106,6 +204,8 @@
             "FlippedFabric": false,
             "HostClass": 3,
             "Hostname": "Jannie",
+            "InstallMethod": "none",
+            "Aliases": [],
             "Interface": [
                 {
                     "IP": [
@@ -122,6 +222,39 @@
                     "MAC": "00:1a:00:17:00:07",
                     "Name": "eth1",
                     "Network": "external"
+                }
+            ],
+            "Storage": [
+                {
+                    "Device":"myDevice",
+                    "Partitions":[
+                        {
+                            "Type": "swap",
+                            "Label": "ETC_VOL",
+                            "Filesystem": "ext4",
+                            "MountPoint": "/mnt/iets",
+                            "Size": 20
+                        },
+                        {
+                            "Type": "root",
+                            "Label": "ETC_ROOTI",
+                            "Filesystem": "xfs",
+                            "MountPoint": "/mnt/koos",
+                            "Size": 10
+                        }
+                    ]
+                },
+                {
+                    "Device":"myDevice",
+                    "Partitions":[
+                        {
+                            "Type": "custom",
+                            "Label": "FER",
+                            "Filesystem": "ext4",
+                            "MountPoint": "/braminda",
+                            "Size": 100
+                        }
+                    ]
                 }
             ],
             "ProductName": "",
