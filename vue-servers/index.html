@@ -14,6 +14,7 @@
   <link href="../base1/roboto.css" rel="stylesheet" />
   <link href="../base1/vuetify.min.css" rel="stylesheet" />
 
+  <script src="../base1/vue.js"></script>
   <script src="../base1/jquery.js"></script>
   <script src="../base1/cockpit.js"></script>
   <script src="../*/po.js"></script>
@@ -167,10 +168,10 @@
                                               </v-alert>
                                             </v-col>
                                           </v-row>
-                                            <storage-device  v-for="(device, index) in editedItem.Storage" :device="device"
+                                          <storage-device v-for="(device, index) in editedItem.Storage" :device="device"
                                             :devices="editedItem.Storage" @remove="removeStorageDevice(index)">
                                           </storage-device>
-                      
+
                                           <br /><br />
 
                                           <!-- BLADEINDEX -->
@@ -272,7 +273,7 @@
     </v-app>
   </div>
 
-  <script src="../base1/vue.js"></script>
+  
   <script src="../base1/vuetify.js"></script>
   <script src="../base1/vuex.min.js"></script>
 
@@ -283,9 +284,20 @@
       data() {
         return {};
       },
-      methods:{
-        addPartition(){
-          return "";
+      methods: {
+        addPartition() {
+          this.device.Partitions.push(
+              {
+                Type: null,
+                Label: null,
+                Filesystem: null,
+                MountPoint: null,
+                Size: null
+              }
+          );
+        },
+        removePartition(index){
+          this.device.Partitions.splice(index, 1);
         }
       },
       template: `
@@ -308,7 +320,7 @@
             <h3>
               Partitions:
               <v-icon small class="ml-2 pa-2" 
-            @click="addPartition">
+            @click="addPartition()">
                 fas fa-plus
             </v-icon>
             </h3>
@@ -317,7 +329,8 @@
         <partitions v-for="(partition, index) in device.Partitions" 
         :partition="partition"
         :partitions="device.Partitions" 
-        @remove="removeStorageDevice(index)">
+        :devices="devices"
+        @remove="removePartition(index)">
         </partitions>
         </v-card>
         `,
@@ -325,33 +338,32 @@
 
     // PARTITIONS - STORAGE DEVICE COMPONENT - POPUP
     Vue.component("partitions", {
-      props: ["partition", "partitions"],
+      props: ["partition", "partitions", "devices"],
       data() {
         return {
-          filesystemTypes:["ext4", "xfs"],
+          filesystemTypes: ["ext4", "xfs"],
         };
       },
       computed: {
         partitionTypes() {
 
-          const partitions = this.partitions.map(
-            (_partition) => _partition.Type
+          const partitionTypes = [];
+
+          this.devices.forEach(
+            (device) => device.Partitions.forEach(
+              (partition) => partitionTypes.push(partition.Type)
+            )
           );
 
-          console.log(partitions);
-
-           return [
-            {
-              text: "Custom",
-              value: "custom",
-            },
-            ...(partitions.filter((value) => value === "root").length < 1 ||
+          return [
+            "custom",
+            ...(partitionTypes.filter((value) => value === "root").length < 1 ||
               this.partition.Type === "root"
-              ? [{ text: "Root", value: "root" }]
+              ? ["root"]
               : []),
-            ...(partitions.filter((value) => value === "swap").length < 1 ||
-            this.partition.Type === "swap"
-              ? [{ text: "Swap", value: "swap" }]
+            ...(partitionTypes.filter((value) => value === "swap").length < 1 ||
+              this.partition.Type === "swap"
+              ? ["swap"]
               : []),
           ];
 
@@ -359,29 +371,29 @@
       },
       template: `
         <v-row>
-          <v-col>
+          <v-col cols="2">
             <v-select
-              label="Partition Type"
+              label="Type"
               v-model="partition.Type"
               :items="partitionTypes"
               />
           </v-col>
-          <v-col>
+          <v-col cols="2">
               <v-text-field
-              label="Partition Label"
+              label="Label"
               v-model="partition.Label"
             />
           </v-col>
-          <v-col>
+          <v-col cols="2">
             <v-select
-              label="Filesystem Type"
+              label="Filesystem"
               v-model="partition.Filesystem"
               :items="filesystemTypes"
               />
           </v-col>
-          <v-col>
+          <v-col cols="2">
               <v-text-field
-              label="Mount Point" 
+              label="MountPoint" 
               v-model="partition.MountPoint"
             />
           </v-col>
@@ -390,6 +402,12 @@
             label="Size (GB)"
             type="number"
             v-model="partition.Size"></v-text-field>
+          </v-col>
+          <v-col cols="2">
+            <v-icon color='red lighten-1'small 
+        @click="$emit('remove')">
+                fas fa-minus
+              </v-icon>
           </v-col>
         </v-row>
         `,
@@ -646,7 +664,7 @@
             ProductName: "",
             Slot: "",
             Interface: [{ IP: null, MAC: null, Name: null, Network: null }],
-            Storage: [{ Device: null, Partitions: [{Type: null, Label: null, Filesystem: null, MountPoint: null, Size: null}] }],
+            Storage: [{ Device: null, Partitions: [{ Type: null, Label: null, Filesystem: null, MountPoint: null, Size: null }] }],
             InternalIP: "",
             InternalMAC: "",
           },
@@ -662,7 +680,7 @@
             ProductName: "",
             Slot: "",
             Interface: [{ IP: null, MAC: null, Name: null, Network: null }],
-            Storage: [{ Device: null, Partitions: [{Type: null, Label: null, Filesystem: null, MountPoint: null, Size: null}] }],
+            Storage: [{ Device: null, Partitions: [{ Type: null, Label: null, Filesystem: null, MountPoint: null, Size: null }] }],
             InternalIP: "",
             InternalMAC: "",
           },
@@ -739,10 +757,10 @@
             Network: null,
           });
         },
-        addStorageDevice(){
+        addStorageDevice() {
           this.editedItem.Storage.push({
             Device: null,
-            Storage: [
+            Partitions: [
               {
                 Type: null,
                 Label: null,
@@ -757,7 +775,7 @@
         removeInterface(index) {
           this.editedItem.Interface.splice(index, 1);
         },
-        removeStorageDevice(index){
+        removeStorageDevice(index) {
           this.editedItem.Storage.splice(index, 1);
         },
 
@@ -765,7 +783,7 @@
           let self = this;
 
           cockpit
-            .file("/usr/share/cockpit/vue-servers/unconfig.json", { syntax: JSON, superuser: "require" })
+            .file("unconfig.json", { syntax: JSON, superuser: "require" })
             .read()
             .done((content, tag) => {
               console.log("Read unconfig.json");
@@ -799,7 +817,7 @@
           let self = this;
 
           cockpit
-            .file("/usr/share/cockpit/vue-servers/config.json", { syntax: JSON, superuser: "require" })
+            .file("config.json", { syntax: JSON, superuser: "require" })
             .read()
             .done((content, tag) => {
               console.log("Read config.json");
